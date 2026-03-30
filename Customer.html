@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>The Spot</title>
+
+<style>
+body{font-family:Arial;margin:0;background:#f4f4f4;}
+
+header{background:black;color:white;padding:25px;text-align:center;}
+
+nav{background:#222;padding:12px;text-align:center;}
+nav a{color:white;margin:15px;text-decoration:none;font-weight:bold;cursor:pointer;}
+
+section{display:none;padding:30px;text-align:center;}
+.active{display:block;}
+
+.products{display:flex;flex-wrap:wrap;justify-content:center;gap:20px;}
+
+.product{background:white;padding:15px;width:220px;border-radius:8px;
+box-shadow:0 0 10px rgba(0,0,0,0.1);}
+
+.product img{width:100%;border-radius:6px;}
+
+button{background:black;color:white;border:none;padding:8px;cursor:pointer;}
+
+.cart-item{background:white;margin:10px;padding:10px;border-radius:6px;}
+
+.partners img{width:180px;margin:10px;}
+
+.whatsapp{
+position:fixed;bottom:20px;right:20px;
+background:#25D366;color:white;padding:12px;border-radius:40px;text-decoration:none;
+}
+
+.cart-count{
+background:red;color:white;border-radius:50%;
+padding:3px 8px;font-size:12px;margin-left:5px;
+}
+</style>
+</head>
+
+<body>
+
+<header>
+<h1>🛍️ The Spot</h1>
+<p>Your destination for the best quality products</p>
+<p>Rapid service • Best prices • Worldwide delivery</p>
+</header>
+
+<nav>
+<a onclick="show('home')">Home</a>
+<a onclick="show('cart'); displayCart();">The Cart <span id="cartCount" class="cart-count">0</span></a>
+<a onclick="show('partners')">Our Partners</a>
+</nav>
+
+<section id="home" class="active">
+<h2>Products</h2>
+<div class="products" id="products"></div>
+</section>
+
+<section id="cart">
+<h2>Your Cart</h2>
+<div id="cartItems"></div>
+<button onclick="checkout()">Pay</button>
+</section>
+
+<section id="payment">
+<h2>Proceed Payment</h2>
+
+<p id="totalPrice"></p>
+
+<p><b>Orange Money:</b> 698131480</p>
+<p><b>MTN Mobile Money:</b> 675366762</p>
+<p><b>Card Payment:</b> Contact us</p>
+
+<p>After payment, send proof on WhatsApp.</p>
+</section>
+
+<section id="partners" class="partners">
+
+<h2>Our Partners</h2>
+
+<p>* DHL is our trusted partner</p>
+
+<img src="https://image2url.com/r2/default/images/1774512234103-662ac598-4e98-4880-9e94-c12dd5ccf76a.png">
+<img src="https://image2url.com/r2/default/images/1774512289484-24d281c7-4926-487c-800b-3ea8898cdf8a.png">
+
+<p>* FedEx is our trusted partner</p>
+
+<img src="https://image2url.com/r2/default/images/1774512409230-76e331da-4749-4337-a03b-a0a30e6cdc98.png">
+<img src="https://image2url.com/r2/default/images/1774512448156-2e5c20a1-9034-4fc5-8ba5-b6e38169ca6f.png">
+
+</section>
+
+<a class="whatsapp" href="https://wa.me/237698131480">WhatsApp</a>
+
+<script>
+
+let products = JSON.parse(localStorage.getItem("products")) || [];
+let cart = [];
+
+function show(id){
+document.querySelectorAll("section").forEach(s=>s.classList.remove("active"));
+document.getElementById(id).classList.add("active");
+}
+
+function displayProducts(){
+let container = document.getElementById("products");
+container.innerHTML="";
+
+products.forEach((p,i)=>{
+container.innerHTML += `
+<div class="product">
+<img src="${p.image}">
+<h3>${p.name}</h3>
+<p>${p.price} FCFA (€${p.euro})</p>
+<button onclick="addToCart(${i})">Buy</button>
+</div>`;
+});
+}
+
+function addToCart(i){
+let existing = cart.find(item => item.index === i);
+
+if(existing){
+existing.qty++;
+}else{
+cart.push({...products[i], qty:1, index:i});
+}
+
+updateCartCount();
+}
+
+function updateCartCount(){
+let total = cart.reduce((sum,item)=>sum+item.qty,0);
+document.getElementById("cartCount").innerText = total;
+}
+
+function displayCart(){
+let c = document.getElementById("cartItems");
+c.innerHTML="";
+
+cart.forEach((item,i)=>{
+c.innerHTML += `
+<div class="cart-item">
+<h4>${item.name}</h4>
+<p>${item.price} FCFA (€${item.euro})</p>
+<p>Quantity: ${item.qty}</p>
+
+<button onclick="increase(${i})">+</button>
+<button onclick="decrease(${i})">-</button>
+<button onclick="removeItem(${i})">Remove</button>
+</div>`;
+});
+}
+
+function increase(i){
+cart[i].qty++;
+displayCart();
+updateCartCount();
+}
+
+function decrease(i){
+if(cart[i].qty > 1){
+cart[i].qty--;
+}else{
+cart.splice(i,1);
+}
+displayCart();
+updateCartCount();
+}
+
+function removeItem(i){
+cart.splice(i,1);
+displayCart();
+updateCartCount();
+}
+
+function checkout(){
+let total = cart.reduce((sum,item)=>sum + item.price*item.qty,0);
+
+document.getElementById("totalPrice").innerHTML =
+"<b>Total to pay: " + total + " FCFA</b>";
+
+show("payment");
+}
+
+displayProducts();
+
+</script>
+
+</body>
+</html>
